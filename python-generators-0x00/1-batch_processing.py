@@ -46,4 +46,4 @@ def batch_processing(batch_size):
 
 
 if __name__ == "__main__":
-    batch_processing(5)
+    batch_processing(50)
