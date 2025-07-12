@@ -12,6 +12,7 @@ async def async_fetch_users():
             print("\n[All Users]")
             for user in users:
                 print(user)
+            return users
 
 
 async def async_fetch_older_users():
@@ -21,6 +22,7 @@ async def async_fetch_older_users():
             print(f"\n[Users older than {age}]")
             for user in users:
                 print(user)
+            return users
 
 
 async def fetch_concurrently():
