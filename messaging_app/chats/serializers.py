@@ -18,6 +18,14 @@ class UserSerializer(serializers.ModelSerializer):
             "created_at",
         ]
 
+    def validate_role(self, value):
+        allowed_roles = ["guest", "host", "admin"]
+        if value not in allowed_roles:
+            raise serializers.ValidationError(
+                f"Invalid role '{value}'. Allowed roles are: {', '.join(allowed_roles)}."
+            )
+        return value
+
 
 class MessageSerializer(serializers.ModelSerializer):
     sender = UserSerializer(read_only=True)
