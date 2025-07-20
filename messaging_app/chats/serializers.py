@@ -4,6 +4,8 @@ from .models import Conversation, Message, User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    role = serializers.CharField()
+
     class Meta:
         model = User
         fields = [
@@ -27,8 +29,11 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class ConversationSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
-    messages = MessageSerializer(many=True, read_only=True)
+    messages = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
-        fields = ["conversation_id", "participants", "messages", "created_at"]
+        fields = ["conversation_id", "participants", "created_at", "messages"]
+
+    def get_messages(self, obj):
+        return MessageSerializer(obj.message_set.all(), many=True).data
