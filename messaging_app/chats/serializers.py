@@ -44,4 +44,4 @@ class ConversationSerializer(serializers.ModelSerializer):
         fields = ["conversation_id", "participants", "created_at", "messages"]
 
     def get_messages(self, obj):
-        return MessageSerializer(obj.message_set.all(), many=True).data
+        return MessageSerializer(obj.messages.all(), many=True).data
