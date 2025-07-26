@@ -25,11 +25,7 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
 
     groups = models.ManyToManyField(
-        Group,
-        related_name="chats_user_set",
-        blank=True,
-        help_text="The groups this user belongs to.",
-        verbose_name="groups",
+       Group, null=True, blank=True
     )
     user_permissions = models.ManyToManyField(
         Permission,
