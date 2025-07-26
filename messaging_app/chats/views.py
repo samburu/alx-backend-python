@@ -44,7 +44,8 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         if self.request.user not in conversation.participants.all():
             raise PermissionDenied(
-                "You are not a participant of this conversation."
+                "You are not a participant of this conversation.",
+                code=status.HTTP_403_FORBIDDEN
             )
 
         return Message.objects.filter(conversation=conversation)
@@ -53,7 +54,8 @@ class MessageViewSet(viewsets.ModelViewSet):
         conversation = serializer.validated_data.get("conversation")
         if self.request.user not in conversation.participants.all():
             raise PermissionDenied(
-                "You are not a participant of this conversation."
+                "You are not a participant of this conversation.",
+                code=status.HTTP_403_FORBIDDEN
             )
 
         serializer.save(sender=self.request.user)
