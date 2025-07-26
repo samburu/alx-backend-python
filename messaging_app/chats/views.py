@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from .models import Conversation, Message
 from .permissions import IsParticipantOrSender
 from .serializers import ConversationSerializer, MessageSerializer
+from .pagination import MessagePagination
+from .filters import MessageFilter
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -30,6 +32,8 @@ class MessageViewSet(viewsets.ModelViewSet):
     permission_classes = [IsParticipantOrSender, IsAuthenticated]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["sent_at"]
+    filterset_class = MessageFilter
+    pagination_class = MessagePagination
 
     def get_queryset(self):
         conversation_id = self.request.query_params.get("conversation_id")

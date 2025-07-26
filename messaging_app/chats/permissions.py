@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
 
-class IsParticipantOfConversation(permissions.BasePermission):
+class IsParticipantOrSender(permissions.BasePermission):
     """
     Custom permission to allow only conversation participants to send, view,
     update, and delete messages.
