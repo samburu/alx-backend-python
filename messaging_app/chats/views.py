@@ -3,6 +3,7 @@ from rest_framework.response import Response
 
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
+from .permissions import IsParticipantOrSender
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -12,7 +13,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsParticipantOrSender]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["created_at"]
 
@@ -24,7 +25,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsParticipantOrSender]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ["sent_at"]
 
