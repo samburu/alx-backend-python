@@ -5,6 +5,11 @@ class IsParticipantOrSender(permissions.BasePermission):
     Custom permission to only allow users to access their own conversations or messages.
     """
 
+    def has_permission(self, request, view):
+        user = request.user
+        # Ensure the user is authenticated
+        return user and user.is_authenticated
+
     def has_object_permission(self, request, view, obj):
         user = request.user
 
