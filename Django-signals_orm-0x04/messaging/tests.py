@@ -1,37 +1,23 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 
-from .models import Message
+from .models import Message, Notification
 
 
-class MessageModelTest(TestCase):
-    """
-    Test case for the Message model.
-    """
-
+class MessageNotificationTest(TestCase):
     def setUp(self):
-        """
-        Create test users and a message.
-        """
-        self.user1 = User.objects.create_user(
-            username="alice", password="password"
+        self.sender = User.objects.create_user(
+            username="sender", password="pass"
         )
-        self.user2 = User.objects.create_user(
-            username="bob", password="password"
+        self.receiver = User.objects.create_user(
+            username="receiver", password="pass"
         )
 
-    def test_message_creation(self):
-        """
-        Test that the message is created correctly.
-        """
+    def test_notification_created_on_message_send(self):
         message = Message.objects.create(
-            sender=self.user1,
-            recipient=self.user2,
-            subject="Test Subject",
-            body="This is a test message.",
+            sender=self.sender, receiver=self.receiver, content="Hello!"
         )
-        self.assertEqual(message.sender, self.user1)
-        self.assertEqual(message.recipient, self.user2)
-        self.assertEqual(message.subject, "Test Subject")
-        self.assertEqual(message.body, "This is a test message.")
-        self.assertFalse(message.is_read)
+        self.assertEqual(Notification.objects.count(), 1)
+        notification = Notification.objects.first()
+        self.assertEqual(notification.user, self.receiver)
+        self.assertEqual(notification.message, message)

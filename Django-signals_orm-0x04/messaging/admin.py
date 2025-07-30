@@ -12,3 +12,8 @@ class MessageAdmin(admin.ModelAdmin):
     search_fields = ("sender__username", "recipient__username", "subject")
     list_filter = ("is_read", "timestamp")
     ordering = ("-timestamp",)
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ("user", "message", "created_at", "is_read")
