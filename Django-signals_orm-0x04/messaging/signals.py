@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 
 from .models import Message, Notification
@@ -31,3 +31,14 @@ def log_message_edit(sender, instance, **kwargs):
             instance.is_edited = True  # Mark as edited if it exists
         except Message.DoesNotExist:
             pass
+
+
+@receiver(post_delete, sender=User)
+def delete_user_related_data(sender, instance, **kwargs):
+    """
+    Signal to delete all messages and notifications related to the user when they are deleted.
+    """
+    Message.objects.filter(sender=instance).delete()
+    Message.objects.filter(receiver=instance).delete()
+    Notification.objects.filter(user=instance).delete()
+    MessageHistory.objects.filter(edited_by=instance).delete()
