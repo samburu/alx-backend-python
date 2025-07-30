@@ -25,9 +25,8 @@ def log_message_edit(sender, instance, **kwargs):
             previous_message = Message.objects.get(pk=instance.pk)
             # If the read status has changed, we can log this change
             MessageHistory.objects.create(
-                user=instance.receiver,
+                edited_by=instance.receiver,
                 message=instance,
-                is_read=instance.is_read,
             )
             instance.is_edited = True  # Mark as edited if it exists
         except Message.DoesNotExist:

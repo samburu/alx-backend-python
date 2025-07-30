@@ -36,10 +36,9 @@ class MessageHistory(models.Model):
     This can be used to track read/unread messages.
     """
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    edited_by = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.ForeignKey(Message, on_delete=models.CASCADE)
-    is_read = models.BooleanField(default=False)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"History for {self.user} - Message ID {self.message.id}"
