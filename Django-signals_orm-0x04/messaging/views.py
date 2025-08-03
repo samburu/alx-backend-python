@@ -18,3 +18,11 @@ def inbox(request):
         receiver=request.user
     ).select_related("sender", "receiver").prefetch_related("replies")
     return render(request, "messaging/inbox.html", {"messages": messages})
+
+
+@login_required
+def sent_messages(request):
+    messages = Message.objects.filter(
+        sender=request.user
+    ).select_related("receiver")
+    return render(request, "messaging/sent_messages.html", {"messages": messages})
