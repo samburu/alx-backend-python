@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
+from django.views.decorators.cache import cache_page
 
 
 @login_required
@@ -28,6 +29,7 @@ def sent_messages(request):
     return render(request, "messaging/sent_messages.html", {"messages": messages})
 
 
+@cache_page(60)
 def unread_messages_view(request):
     unread_msgs = Message.unread.unread_for_user(request.user).only("id", "sender", "content", "timestamp")
     return render(request, "messaging/unread_messages.html", {"messages": unread_msgs})
