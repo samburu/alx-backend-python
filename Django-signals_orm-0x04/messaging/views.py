@@ -26,3 +26,9 @@ def sent_messages(request):
         sender=request.user
     ).select_related("receiver")
     return render(request, "messaging/sent_messages.html", {"messages": messages})
+
+
+@login_required
+def unread_messages(request):
+    messages = Message.unread.for_user(request.user)
+    return render(request, "messaging/unread_messages.html", {"messages": messages})

@@ -14,6 +14,9 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         related_name='replies'
     )
+    read = models.BooleanField(default=False)
+    objects = models.Manager()
+    unread = UnreadMessagesManager()
 
     def __str__(self):
         return f"{self.sender.username}: {self.content[:30]}"
@@ -34,35 +37,13 @@ class Message(models.Model):
         return fetch_replies(self)
 
 
-class Message(models.Model):
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
-    content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-    parent_message = models.ForeignKey(
-        'self',
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name='replies'
-    )
+class UnreadMessagesManager(models.Manager):
+    def for_user(self, user):
+        return self.get_queryset().filter(
+            receiver=user,
+            read=False
+        ).only("id", "sender", "content", "created_at")
 
-    def __str__(self):
-        return f"{self.sender.username}: {self.content[:30]}"
-
-    def get_thread(self):
-        """
-        Recursively fetch all replies to this message in a nested format.
-        """
-        def fetch_replies(message):
-            result = []
-            for reply in message.replies.all():
-                result.append({
-                    'message': reply,
-                    'replies': fetch_replies(reply)
-                })
-            return result
-
-        return fetch_replies(self)
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
