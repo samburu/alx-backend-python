@@ -2,6 +2,8 @@ from rest_framework import filters, permissions, status, viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.views.decorators.cache import cache_page
+from django.shortcuts import render
 
 from .models import Conversation, Message
 from .permissions import IsParticipantOrSender
@@ -63,3 +65,9 @@ class MessageViewSet(viewsets.ModelViewSet):
             )
 
         serializer.save(sender=self.request.user)
+
+
+@cache_page(60)
+def conversation_view(request, conversation_id):
+    messages = Message.objects.filter(conversation_id=conversation_id).order_by("timestamp")
+    return render(request, "chats/conversation.html", {"messages": messages})
