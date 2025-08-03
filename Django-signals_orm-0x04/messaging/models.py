@@ -3,22 +3,65 @@ from django.contrib.auth.models import User
 
 
 class Message(models.Model):
-    """ """
-
-    sender = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="sent_messages"
-    )
-    receiver = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="received_messages"
-    )
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    is_read = models.BooleanField(default=False)
-    is_edited = models.BooleanField(default=False)
+    parent_message = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='replies'
+    )
 
     def __str__(self):
-        return f"Message from {self.sender} to {self.receiver}"
+        return f"{self.sender.username}: {self.content[:30]}"
 
+    def get_thread(self):
+        """
+        Recursively fetch all replies to this message in a nested format.
+        """
+        def fetch_replies(message):
+            result = []
+            for reply in message.replies.all():
+                result.append({
+                    'message': reply,
+                    'replies': fetch_replies(reply)
+                })
+            return result
+
+        return fetch_replies(self)
+
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    parent_message = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='replies'
+    )
+
+    def __str__(self):
+        return f"{self.sender.username}: {self.content[:30]}"
+
+    def get_thread(self):
+        """
+        Recursively fetch all replies to this message in a nested format.
+        """
+        def fetch_replies(message):
+            result = []
+            for reply in message.replies.all():
+                result.append({
+                    'message': reply,
+                    'replies': fetch_replies(reply)
+                })
+            return result
+
+        return fetch_replies(self)
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
