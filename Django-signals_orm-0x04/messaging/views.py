@@ -10,3 +10,11 @@ def delete_user(request):
     logout(request)  # log them out first
     user.delete()
     return redirect("home")  # redirect to home page or login page
+
+
+@login_required
+def inbox(request):
+    messages = Message.objects.filter(
+        receiver=request.user
+    ).select_related("sender", "receiver").prefetch_related("replies")
+    return render(request, "messaging/inbox.html", {"messages": messages})
