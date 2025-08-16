@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Script: kubctl-0x01
+# Objective: Scale the Django app deployment to 3 replicas,
+#            verify pods, run load test with wrk, and monitor usage.
+
+set -e
+
+DEPLOYMENT_NAME="messaging-app-deployment"
+NAMESPACE="default"   # change if using another namespace
+SERVICE_NAME="messaging-app-service"
+APP_PORT=8000         # Django default port
+
+echo "Scaling $DEPLOYMENT_NAME to 3 replicas..."
+kubectl scale deployment $DEPLOYMENT_NAME --replicas=3 -n $NAMESPACE
+
+echo "Verifying pods..."
+kubectl get pods -l app=messaging-app -n $NAMESPACE
+
+echo "Forwarding service port for load testing..."
+kubectl port-forward svc/$SERVICE_NAME 8000:8000 -n $NAMESPACE &
+PF_PID=$!
+sleep 5   # give time for port-forward to be ready
+
+echo "Running load test with wrk (10s, 100 connections, 100 threads)..."
+wrk -t100 -c100 -d10s http://127.0.0.1:$APP_PORT/
+
+echo "Checking resource usage..."
+kubectl top pods -n $NAMESPACE
+
+# Cleanup port-forward
+kill $PF_PID
