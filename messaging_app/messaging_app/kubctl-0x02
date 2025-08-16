@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Apply blue deployment
+echo "Deploying BLUE version..."
+kubectl apply -f blue_deployment.yaml
+
+# Apply green deployment
+echo "Deploying GREEN version..."
+kubectl apply -f green_deployment.yaml
+
+# Check logs for GREEN version
+echo "Checking logs for GREEN deployment..."
+kubectl logs -l app=django,version=green --tail=50
+
+# Switch service from BLUE to GREEN
+echo "Switching service to GREEN..."
+kubectl patch service django-service -p '{"spec":{"selector":{"app":"django","version":"green"}}}'
+
+echo "Blue-Green Deployment completed!"
