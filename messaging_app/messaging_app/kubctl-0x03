@@ -1,0 +1,29 @@
+#!/bin/bash
+# kubctl-0x03
+# Script to perform a rolling update for Django app
+
+set -e
+
+DEPLOYMENT="django-blue-deployment"
+NAMESPACE="default"   # change if using another namespace
+SERVICE="django-service"
+
+echo "Starting Rolling Update for $DEPLOYMENT ..."
+
+# 1. Apply the new deployment (with image:2.0)
+kubectl apply -f messaging_app/blue_deployment.yaml
+
+# 2. Monitor rollout status
+echo "Monitoring rollout status..."
+kubectl rollout status deployment/$DEPLOYMENT --namespace=$NAMESPACE
+
+# 3. Test availability during rollout
+echo "Testing service availability..."
+for i in {1..20}; do
+    curl -s http://$(minikube ip)/api/ || echo "❌ Request failed"
+    sleep 2
+done
+
+# 4. Verify new pods
+echo "✅ Current Pods:"
+kubectl get pods -l app=django-blue -o wide --namespace=$NAMESPACE
