@@ -2,53 +2,61 @@ name: Django CI
 
 on:
   push:
-    branches: ["*"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["*"]
+    branches: [ "main" ]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:13
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: test_db
-          MYSQL_USER: test_user
-          MYSQL_PASSWORD: test_password
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
         ports:
-          - 3306:3306
+          - 5432:5432
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -proot"
+          --health-cmd="pg_isready -U postgres"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
-
-    env:
-      DATABASE_URL: mysql://test_user:test_password@127.0.0.1:3306/test_db
+          --health-retries=5
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r messaging_app/requirements.txt
+          pip install -r requirements.txt
+          pip install flake8 coverage
 
-      - name: Run migrations
+      # 🔹 Run flake8 linting
+      - name: Run flake8 linting
         run: |
-          cd messaging_app
-          python manage.py migrate --noinput
+          flake8 messaging_app --count --max-line-length=100 --show-source --statistics
 
-      - name: Run tests
+      # 🔹 Run tests with coverage
+      - name: Run Django tests with coverage
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
         run: |
-          cd messaging_app
-          python manage.py test
+          coverage run manage.py test
+          coverage report -m
+          coverage xml
+
+      # 🔹 Upload coverage report artifact
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
